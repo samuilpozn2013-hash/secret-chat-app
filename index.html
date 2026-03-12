@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SecretChat 🔐</title>
+    <title>SecretChat 🔢</title>
     <style>
         * {
             margin: 0;
@@ -175,8 +175,8 @@
 </head>
 <body>
     <div class="container">
-        <h1>🔐 SecretChat</h1>
-        <p class="subtitle">Шифруй и расшифровывай секретные сообщения с друзьями</p>
+        <h1>🔢 SecretChat</h1>
+        <p class="subtitle">Шифруй буквы в цифры: а=1, б=2, a=1, b=2</p>
         
         <div class="tabs">
             <button class="tab active" onclick="switchTab('encode')">Шифровать</button>
@@ -186,12 +186,12 @@
         <div id="encode-section">
             <div class="input-group">
                 <label for="message">Твоё сообщение:</label>
-                <textarea id="message" rows="4" placeholder="Введи секретное сообщение..."></textarea>
+                <textarea id="message" rows="4" placeholder="Введи сообщение на русском или английском..."></textarea>
             </div>
             
             <div class="buttons">
                 <button class="primary-btn" onclick="encodeMessage()">
-                    <span>🔒 Зашифровать</span>
+                    <span>🔢 Зашифровать</span>
                 </button>
                 <button class="secondary-btn" onclick="clearFields()">
                     <span>🗑️ Очистить</span>
@@ -202,12 +202,12 @@
         <div id="decode-section" style="display: none;">
             <div class="input-group">
                 <label for="encoded-message">Зашифрованное сообщение:</label>
-                <textarea id="encoded-message" rows="4" placeholder="Вставь зашифрованное сообщение..."></textarea>
+                <textarea id="encoded-message" rows="4" placeholder="Вставь зашифрованное сообщение (цифры через пробелы)..."></textarea>
             </div>
             
             <div class="buttons">
                 <button class="primary-btn" onclick="decodeMessage()">
-                    <span>🔓 Расшифровать</span>
+                    <span>🔠 Расшифровать</span>
                 </button>
                 <button class="secondary-btn" onclick="clearDecodeFields()">
                     <span>🗑️ Очистить</span>
@@ -223,8 +223,6 @@
     </div>
     
     <script>
-        const SHIFT = 3;
-        
         function switchTab(tab) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab').forEach(t => {
@@ -238,44 +236,117 @@
             document.getElementById('result').style.display = 'none';
         }
         
-        function caesarCipher(text, shift, encode = true) {
-            let result = '';
-            shift = encode ? shift : -shift;
-            
-            for (let i = 0; i < text.length; i++) {
-                let char = text[i];
-                if (char.match(/[a-z]/i)) {
-                    let code = text.charCodeAt(i);
-                    let base = code >= 65 && code <= 90 ? 65 : 97;
-                    char = String.fromCharCode(((code - base + shift + 26) % 26) + base);
-                }
-                result += char;
-            }
-            return result;
-        }
+        // Русский алфавит
+        const ruLower = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя';
+        const ruUpper = 'АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ';
+        
+        // Английский алфавит
+        const enLower = 'abcdefghijklmnopqrstuvwxyz';
+        const enUpper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
         
         function encodeMessage() {
-            const message = document.getElementById('message').value.trim();
+            const message = document.getElementById('message').value;
             
-            if (!message) {
+            if (!message.trim()) {
                 alert('Введи сообщение');
                 return;
             }
             
-            const encoded = caesarCipher(message, SHIFT, true);
-            showResult(`Зашифрованное сообщение:`, encoded);
+            let result = '';
+            for (let i = 0; i < message.length; i++) {
+                const char = message[i];
+                
+                // Проверяем русские буквы (строчные)
+                const ruLowerIndex = ruLower.indexOf(char);
+                if (ruLowerIndex !== -1) {
+                    result += (ruLowerIndex + 1) + ' ';
+                    continue;
+                }
+                
+                // Проверяем русские буквы (заглавные)
+                const ruUpperIndex = ruUpper.indexOf(char);
+                if (ruUpperIndex !== -1) {
+                    result += '!' + (ruUpperIndex + 1) + ' ';
+                    continue;
+                }
+                
+                // Проверяем английские буквы (строчные)
+                const enLowerIndex = enLower.indexOf(char);
+                if (enLowerIndex !== -1) {
+                    result += 'e' + (enLowerIndex + 1) + ' ';
+                    continue;
+                }
+                
+                // Проверяем английские буквы (заглавные)
+                const enUpperIndex = enUpper.indexOf(char);
+                if (enUpperIndex !== -1) {
+                    result += 'E' + (enUpperIndex + 1) + ' ';
+                    continue;
+                }
+                
+                // Знаки препинания и пробелы остаются как есть
+                result += char + ' ';
+            }
+            
+            showResult(`Зашифрованное сообщение:`, result.trim());
         }
         
         function decodeMessage() {
-            const message = document.getElementById('encoded-message').value.trim();
+            const encoded = document.getElementById('encoded-message').value.trim();
             
-            if (!message) {
+            if (!encoded) {
                 alert('Введи зашифрованное сообщение');
                 return;
             }
             
-            const decoded = caesarCipher(message, SHIFT, false);
-            showResult(`Расшифрованное сообщение:`, decoded);
+            // Разбиваем по пробелам
+            const parts = encoded.split(/\s+/);
+            let result = '';
+            
+            for (let part of parts) {
+                // Если часть начинается с '!' — русская заглавная буква
+                if (part.startsWith('!')) {
+                    const num = parseInt(part.substring(1));
+                    if (num >= 1 && num <= 33) {
+                        result += ruUpper[num - 1];
+                    } else {
+                        result += part;
+                    }
+                }
+                // Если часть начинается с 'E' — английская заглавная буква
+                else if (part.startsWith('E')) {
+                    const num = parseInt(part.substring(1));
+                    if (num >= 1 && num <= 26) {
+                        result += enUpper[num - 1];
+                    } else {
+                        result += part;
+                    }
+                }
+                // Если часть начинается с 'e' — английская строчная буква
+                else if (part.startsWith('e')) {
+                    const num = parseInt(part.substring(1));
+                    if (num >= 1 && num <= 26) {
+                        result += enLower[num - 1];
+                    } else {
+                        result += part;
+                    }
+                }
+                // Если часть — просто число — русская строчная буква
+                else if (/^\d+$/.test(part)) {
+                    const num = parseInt(part);
+                    if (num >= 1 && num <= 33) {
+                        result += ruLower[num - 1];
+                    } else {
+                        result += part;
+                    }
+                }
+                // Иначе — знак препинания или пробел
+                else {
+                    result += part;
+                }
+            }
+            
+            showResult(`Расшифрованное сообщение:`, result);
         }
         
         function showResult(title, text) {
