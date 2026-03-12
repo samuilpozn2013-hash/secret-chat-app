@@ -265,9 +265,10 @@
                     continue;
                 }
                 
-                // Цифры остаются как есть
+                // Цифры → четырёхзначные числа с ведущими нулями
                 if (digits.includes(char)) {
-                    result += char + '-';
+                    const num = parseInt(char);
+                    result += num.toString().padStart(4, '0') + '-';
                     continue;
                 }
                 
@@ -332,6 +333,15 @@
                     if (num === 0) {
                         result += ' ';
                     }
+                    // Цифры (четырёхзначные числа 0000-0009)
+                    else if (part.length === 4 && part.startsWith('000')) {
+                        const digit = parseInt(part[3]);
+                        if (digit >= 0 && digit <= 9) {
+                            result += digit.toString();
+                        } else {
+                            result += part;
+                        }
+                    }
                     // Русские строчные 1-33
                     else if (num >= 1 && num <= 33) {
                         result += ruLower[num - 1];
@@ -347,10 +357,6 @@
                     // Английские заглавные 301-326
                     else if (num >= 301 && num <= 326) {
                         result += enUpper[num - 301];
-                    }
-                    // Цифры (0-9)
-                    else if (num >= 0 && num <= 9) {
-                        result += num.toString();
                     }
                     // Неизвестное число
                     else {
