@@ -84,7 +84,7 @@
             font-weight: 500;
         }
         
-        textarea, input {
+        textarea {
             width: 100%;
             padding: 16px;
             border: 2px solid #e0e0e0;
@@ -94,7 +94,7 @@
             resize: vertical;
         }
         
-        textarea:focus, input:focus {
+        textarea:focus {
             outline: none;
             border-color: #667eea;
         }
@@ -189,11 +189,6 @@
                 <textarea id="message" rows="4" placeholder="Введи секретное сообщение..."></textarea>
             </div>
             
-            <div class="input-group">
-                <label for="shift">Сдвиг (1-25):</label>
-                <input type="number" id="shift" min="1" max="25" value="3" placeholder="3">
-            </div>
-            
             <div class="buttons">
                 <button class="primary-btn" onclick="encodeMessage()">
                     <span>🔒 Зашифровать</span>
@@ -208,11 +203,6 @@
             <div class="input-group">
                 <label for="encoded-message">Зашифрованное сообщение:</label>
                 <textarea id="encoded-message" rows="4" placeholder="Вставь зашифрованное сообщение..."></textarea>
-            </div>
-            
-            <div class="input-group">
-                <label for="decode-shift">Сдвиг (1-25):</label>
-                <input type="number" id="decode-shift" min="1" max="25" value="3" placeholder="3">
             </div>
             
             <div class="buttons">
@@ -233,6 +223,8 @@
     </div>
     
     <script>
+        const SHIFT = 3;
+        
         function switchTab(tab) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab').forEach(t => {
@@ -264,38 +256,26 @@
         
         function encodeMessage() {
             const message = document.getElementById('message').value.trim();
-            const shift = parseInt(document.getElementById('shift').value);
             
             if (!message) {
                 alert('Введи сообщение');
                 return;
             }
             
-            if (shift < 1 || shift > 25) {
-                alert('Сдвиг должен быть от 1 до 25');
-                return;
-            }
-            
-            const encoded = caesarCipher(message, shift, true);
-            showResult(`Зашифрованное сообщение (сдвиг ${shift}):`, encoded);
+            const encoded = caesarCipher(message, SHIFT, true);
+            showResult(`Зашифрованное сообщение:`, encoded);
         }
         
         function decodeMessage() {
             const message = document.getElementById('encoded-message').value.trim();
-            const shift = parseInt(document.getElementById('decode-shift').value);
             
             if (!message) {
                 alert('Введи зашифрованное сообщение');
                 return;
             }
             
-            if (shift < 1 || shift > 25) {
-                alert('Сдвиг должен быть от 1 до 25');
-                return;
-            }
-            
-            const decoded = caesarCipher(message, shift, false);
-            showResult(`Расшифрованное сообщение (сдвиг ${shift}):`, decoded);
+            const decoded = caesarCipher(message, SHIFT, false);
+            showResult(`Расшифрованное сообщение:`, decoded);
         }
         
         function showResult(title, text) {
@@ -314,13 +294,11 @@
         
         function clearFields() {
             document.getElementById('message').value = '';
-            document.getElementById('shift').value = '3';
             document.getElementById('result').style.display = 'none';
         }
         
         function clearDecodeFields() {
             document.getElementById('encoded-message').value = '';
-            document.getElementById('decode-shift').value = '3';
             document.getElementById('result').style.display = 'none';
         }
         
