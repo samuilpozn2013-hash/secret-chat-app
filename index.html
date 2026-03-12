@@ -176,7 +176,7 @@
 <body>
     <div class="container">
         <h1>🔢 SecretChat</h1>
-        <p class="subtitle">Шифруй буквы в цифры: а=1, б=2, a=1, b=2</p>
+        <p class="subtitle">Шифрование: русские 1-33, английские 101-126, заглавные 201+/301+, пробел=0</p>
         
         <div class="tabs">
             <button class="tab active" onclick="switchTab('encode')">Шифровать</button>
@@ -244,6 +244,9 @@
         const enLower = 'abcdefghijklmnopqrstuvwxyz';
         const enUpper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
         
+        // Знаки препинания (оставляем как есть)
+        const punctuation = '!@#$%^&*()_+-=[]{}|;:",./<>?`~';
+        
         function encodeMessage() {
             const message = document.getElementById('message').value;
             
@@ -256,35 +259,41 @@
             for (let i = 0; i < message.length; i++) {
                 const char = message[i];
                 
-                // Проверяем русские буквы (строчные)
+                // Пробел → 0
+                if (char === ' ') {
+                    result += '0 ';
+                    continue;
+                }
+                
+                // Русские строчные → 1-33
                 const ruLowerIndex = ruLower.indexOf(char);
                 if (ruLowerIndex !== -1) {
                     result += (ruLowerIndex + 1) + ' ';
                     continue;
                 }
                 
-                // Проверяем русские буквы (заглавные)
+                // Русские заглавные → 201-233
                 const ruUpperIndex = ruUpper.indexOf(char);
                 if (ruUpperIndex !== -1) {
-                    result += '!' + (ruUpperIndex + 1) + ' ';
+                    result += (201 + ruUpperIndex) + ' ';
                     continue;
                 }
                 
-                // Проверяем английские буквы (строчные)
+                // Английские строчные → 101-126
                 const enLowerIndex = enLower.indexOf(char);
                 if (enLowerIndex !== -1) {
-                    result += 'e' + (enLowerIndex + 1) + ' ';
+                    result += (101 + enLowerIndex) + ' ';
                     continue;
                 }
                 
-                // Проверяем английские буквы (заглавные)
+                // Английские заглавные → 301-326
                 const enUpperIndex = enUpper.indexOf(char);
                 if (enUpperIndex !== -1) {
-                    result += 'E' + (enUpperIndex + 1) + ' ';
+                    result += (301 + enUpperIndex) + ' ';
                     continue;
                 }
                 
-                // Знаки препинания и пробелы остаются как есть
+                // Знаки препинания остаются как есть
                 result += char + ' ';
             }
             
@@ -304,43 +313,36 @@
             let result = '';
             
             for (let part of parts) {
-                // Если часть начинается с '!' — русская заглавная буква
-                if (part.startsWith('!')) {
-                    const num = parseInt(part.substring(1));
-                    if (num >= 1 && num <= 33) {
-                        result += ruUpper[num - 1];
-                    } else {
-                        result += part;
-                    }
-                }
-                // Если часть начинается с 'E' — английская заглавная буква
-                else if (part.startsWith('E')) {
-                    const num = parseInt(part.substring(1));
-                    if (num >= 1 && num <= 26) {
-                        result += enUpper[num - 1];
-                    } else {
-                        result += part;
-                    }
-                }
-                // Если часть начинается с 'e' — английская строчная буква
-                else if (part.startsWith('e')) {
-                    const num = parseInt(part.substring(1));
-                    if (num >= 1 && num <= 26) {
-                        result += enLower[num - 1];
-                    } else {
-                        result += part;
-                    }
-                }
-                // Если часть — просто число — русская строчная буква
-                else if (/^\d+$/.test(part)) {
+                // Если часть — число
+                if (/^\d+$/.test(part)) {
                     const num = parseInt(part);
-                    if (num >= 1 && num <= 33) {
+                    
+                    // Пробел (0)
+                    if (num === 0) {
+                        result += ' ';
+                    }
+                    // Русские строчные 1-33
+                    else if (num >= 1 && num <= 33) {
                         result += ruLower[num - 1];
-                    } else {
+                    }
+                    // Русские заглавные 201-233
+                    else if (num >= 201 && num <= 233) {
+                        result += ruUpper[num - 201];
+                    }
+                    // Английские строчные 101-126
+                    else if (num >= 101 && num <= 126) {
+                        result += enLower[num - 101];
+                    }
+                    // Английские заглавные 301-326
+                    else if (num >= 301 && num <= 326) {
+                        result += enUpper[num - 301];
+                    }
+                    // Неизвестное число
+                    else {
                         result += part;
                     }
                 }
-                // Иначе — знак препинания или пробел
+                // Знаки препинания
                 else {
                     result += part;
                 }
