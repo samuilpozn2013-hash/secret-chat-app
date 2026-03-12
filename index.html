@@ -176,7 +176,7 @@
 <body>
     <div class="container">
         <h1>🔢 SecretChat</h1>
-        <p class="subtitle">Шифрование: русские 1-33, английские 101-126, заглавные 201+/301+, пробел=0</p>
+        <p class="subtitle">Шифрование: русские 1-33, английские 101-126, заглавные 201+/301+, пробел=0, цифры как есть</p>
         
         <div class="tabs">
             <button class="tab active" onclick="switchTab('encode')">Шифровать</button>
@@ -202,7 +202,7 @@
         <div id="decode-section" style="display: none;">
             <div class="input-group">
                 <label for="encoded-message">Зашифрованное сообщение:</label>
-                <textarea id="encoded-message" rows="4" placeholder="Вставь зашифрованное сообщение (цифры через пробелы)..."></textarea>
+                <textarea id="encoded-message" rows="4" placeholder="Вставь зашифрованное сообщение (цифры через тире)..."></textarea>
             </div>
             
             <div class="buttons">
@@ -244,8 +244,8 @@
         const enLower = 'abcdefghijklmnopqrstuvwxyz';
         const enUpper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
         
-        // Знаки препинания (оставляем как есть)
-        const punctuation = '!@#$%^&*()_+-=[]{}|;:",./<>?`~';
+        // Цифры
+        const digits = '0123456789';
         
         function encodeMessage() {
             const message = document.getElementById('message').value;
@@ -261,43 +261,54 @@
                 
                 // Пробел → 0
                 if (char === ' ') {
-                    result += '0 ';
+                    result += '0-';
+                    continue;
+                }
+                
+                // Цифры остаются как есть
+                if (digits.includes(char)) {
+                    result += char + '-';
                     continue;
                 }
                 
                 // Русские строчные → 1-33
                 const ruLowerIndex = ruLower.indexOf(char);
                 if (ruLowerIndex !== -1) {
-                    result += (ruLowerIndex + 1) + ' ';
+                    result += (ruLowerIndex + 1) + '-';
                     continue;
                 }
                 
                 // Русские заглавные → 201-233
                 const ruUpperIndex = ruUpper.indexOf(char);
                 if (ruUpperIndex !== -1) {
-                    result += (201 + ruUpperIndex) + ' ';
+                    result += (201 + ruUpperIndex) + '-';
                     continue;
                 }
                 
                 // Английские строчные → 101-126
                 const enLowerIndex = enLower.indexOf(char);
                 if (enLowerIndex !== -1) {
-                    result += (101 + enLowerIndex) + ' ';
+                    result += (101 + enLowerIndex) + '-';
                     continue;
                 }
                 
                 // Английские заглавные → 301-326
                 const enUpperIndex = enUpper.indexOf(char);
                 if (enUpperIndex !== -1) {
-                    result += (301 + enUpperIndex) + ' ';
+                    result += (301 + enUpperIndex) + '-';
                     continue;
                 }
                 
                 // Знаки препинания остаются как есть
-                result += char + ' ';
+                result += char + '-';
             }
             
-            showResult(`Зашифрованное сообщение:`, result.trim());
+            // Убираем последний тире
+            if (result.endsWith('-')) {
+                result = result.slice(0, -1);
+            }
+            
+            showResult(`Зашифрованное сообщение:`, result);
         }
         
         function decodeMessage() {
@@ -308,8 +319,8 @@
                 return;
             }
             
-            // Разбиваем по пробелам
-            const parts = encoded.split(/\s+/);
+            // Разбиваем по тире
+            const parts = encoded.split('-');
             let result = '';
             
             for (let part of parts) {
@@ -336,6 +347,10 @@
                     // Английские заглавные 301-326
                     else if (num >= 301 && num <= 326) {
                         result += enUpper[num - 301];
+                    }
+                    // Цифры (0-9)
+                    else if (num >= 0 && num <= 9) {
+                        result += num.toString();
                     }
                     // Неизвестное число
                     else {
