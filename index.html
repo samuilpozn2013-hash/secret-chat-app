@@ -166,51 +166,6 @@
             color: white;
         }
         
-        .history {
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #e0e0e0;
-        }
-        
-        .history-title {
-            font-weight: 600;
-            margin-bottom: 15px;
-            color: #333;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .history-item {
-            background: white;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            border: 1px solid #e0e0e0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .history-text {
-            font-family: monospace;
-            font-size: 14px;
-            max-width: 70%;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        
-        .history-actions {
-            display: flex;
-            gap: 8px;
-        }
-        
-        .small-btn {
-            padding: 6px 12px;
-            font-size: 12px;
-            border-radius: 6px;
-        }
-        
         @media (max-width: 600px) {
             .container {
                 padding: 20px;
@@ -275,14 +230,6 @@
             <div class="result-text" id="result-text"></div>
             <button class="copy-btn" onclick="copyResult()">📋 КОПИРОВАТЬ</button>
         </div>
-        
-        <div class="history">
-            <div class="history-title">
-                <span>📜 История</span>
-                <button class="small-btn secondary-btn" onclick="clearHistory()">Очистить всё</button>
-            </div>
-            <div id="history-list"></div>
-        </div>
     </div>
     
     <script>
@@ -331,7 +278,6 @@
             
             const encoded = caesarCipher(message, shift, true);
             showResult(`Зашифрованное сообщение (сдвиг ${shift}):`, encoded);
-            addToHistory(message, encoded, shift, 'encode');
         }
         
         function decodeMessage() {
@@ -350,7 +296,6 @@
             
             const decoded = caesarCipher(message, shift, false);
             showResult(`Расшифрованное сообщение (сдвиг ${shift}):`, decoded);
-            addToHistory(message, decoded, shift, 'decode');
         }
         
         function showResult(title, text) {
@@ -379,74 +324,7 @@
             document.getElementById('result').style.display = 'none';
         }
         
-        function addToHistory(original, result, shift, type) {
-            const history = JSON.parse(localStorage.getItem('secretChatHistory') || '[]');
-            history.unshift({
-                original,
-                result,
-                shift,
-                type,
-                timestamp: new Date().toLocaleString()
-            });
-            
-            if (history.length > 10) history.pop();
-            localStorage.setItem('secretChatHistory', JSON.stringify(history));
-            renderHistory();
-        }
-        
-        function renderHistory() {
-            const history = JSON.parse(localStorage.getItem('secretChatHistory') || '[]');
-            const container = document.getElementById('history-list');
-            container.innerHTML = '';
-            
-            history.forEach((item, index) => {
-                const div = document.createElement('div');
-                div.className = 'history-item';
-                div.innerHTML = `
-                    <div class="history-text">
-                        <strong>${item.type === 'encode' ? '🔒' : '🔓'}</strong> 
-                        ${item.original.substring(0, 30)}${item.original.length > 30 ? '...' : ''}
-                    </div>
-                    <div class="history-actions">
-                        <button class="small-btn secondary-btn" onclick="useHistoryItem(${index})">Использовать</button>
-                        <button class="small-btn secondary-btn" onclick="deleteHistoryItem(${index})">Удалить</button>
-                    </div>
-                `;
-                container.appendChild(div);
-            });
-        }
-        
-        function useHistoryItem(index) {
-            const history = JSON.parse(localStorage.getItem('secretChatHistory') || '[]');
-            const item = history[index];
-            
-            if (item.type === 'encode') {
-                switchTab('encode');
-                document.getElementById('message').value = item.original;
-                document.getElementById('shift').value = item.shift;
-            } else {
-                switchTab('decode');
-                document.getElementById('encoded-message').value = item.original;
-                document.getElementById('decode-shift').value = item.shift;
-            }
-        }
-        
-        function deleteHistoryItem(index) {
-            const history = JSON.parse(localStorage.getItem('secretChatHistory') || '[]');
-            history.splice(index, 1);
-            localStorage.setItem('secretChatHistory', JSON.stringify(history));
-            renderHistory();
-        }
-        
-        function clearHistory() {
-            if (confirm('Очистить всю историю?')) {
-                localStorage.removeItem('secretChatHistory');
-                renderHistory();
-            }
-        }
-        
         document.addEventListener('DOMContentLoaded', () => {
-            renderHistory();
             document.getElementById('message').focus();
         });
     </script>
