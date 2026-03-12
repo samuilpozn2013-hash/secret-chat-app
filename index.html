@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -101,12 +101,13 @@
         
         .buttons {
             display: flex;
+            flex-direction: column;
             gap: 12px;
             margin-top: 25px;
         }
         
         button {
-            flex: 1;
+            width: 100%;
             padding: 16px;
             border: none;
             border-radius: 12px;
@@ -161,7 +162,6 @@
         }
         
         .copy-btn {
-            width: 100%;
             background: #10b981;
             color: white;
         }
@@ -215,79 +215,71 @@
             .container {
                 padding: 20px;
             }
-            
-            .buttons {
-                flex-direction: column;
-            }
-            
-            button {
-                width: 100%;
-            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🔐 SecretChat</h1>
-        <p class="subtitle">Encode and decode secret messages with friends</p>
+        <p class="subtitle">Шифруй и расшифровывай секретные сообщения с друзьями</p>
         
         <div class="tabs">
-            <button class="tab active" onclick="switchTab('encode')">Encode</button>
-            <button class="tab" onclick="switchTab('decode')">Decode</button>
+            <button class="tab active" onclick="switchTab('encode')">Шифровать</button>
+            <button class="tab" onclick="switchTab('decode')">Расшифровать</button>
         </div>
         
         <div id="encode-section">
             <div class="input-group">
-                <label for="message">Your message:</label>
-                <textarea id="message" rows="4" placeholder="Type your secret message here..."></textarea>
+                <label for="message">Твоё сообщение:</label>
+                <textarea id="message" rows="4" placeholder="Введи секретное сообщение..."></textarea>
             </div>
             
             <div class="input-group">
-                <label for="shift">Shift (1-25):</label>
+                <label for="shift">Сдвиг (1-25):</label>
                 <input type="number" id="shift" min="1" max="25" value="3" placeholder="3">
             </div>
             
             <div class="buttons">
                 <button class="primary-btn" onclick="encodeMessage()">
-                    <span>🔒 Encode</span>
+                    <span>🔒 Зашифровать</span>
                 </button>
                 <button class="secondary-btn" onclick="clearFields()">
-                    <span>🗑️ Clear</span>
+                    <span>🗑️ Очистить</span>
                 </button>
             </div>
         </div>
         
         <div id="decode-section" style="display: none;">
             <div class="input-group">
-                <label for="encoded-message">Encoded message:</label>
-                <textarea id="encoded-message" rows="4" placeholder="Paste encoded message here..."></textarea>
+                <label for="encoded-message">Зашифрованное сообщение:</label>
+                <textarea id="encoded-message" rows="4" placeholder="Вставь зашифрованное сообщение..."></textarea>
             </div>
             
             <div class="input-group">
-                <label for="decode-shift">Shift (1-25):</label>
+                <label for="decode-shift">Сдвиг (1-25):</label>
                 <input type="number" id="decode-shift" min="1" max="25" value="3" placeholder="3">
             </div>
             
             <div class="buttons">
                 <button class="primary-btn" onclick="decodeMessage()">
-                    <span>🔓 Decode</span>
+                    <span>🔓 Расшифровать</span>
                 </button>
                 <button class="secondary-btn" onclick="clearDecodeFields()">
-                    <span>🗑️ Clear</span>
+                    <span>🗑️ Очистить</span>
                 </button>
             </div>
         </div>
         
         <div class="result" id="result">
-            <div class="result-title">Result:</div>
+            <div class="result-title">Результат:</div>
             <div class="result-text" id="result-text"></div>
-            <button class="copy-btn" onclick="copyResult()">📋 Copy to clipboard</button>
+            <button class="copy-btn" onclick="copyResult()">📋 КОПИРОВАТЬ</button>
         </div>
         
         <div class="history">
             <div class="history-title">
-                <span>📜 History</span>
-                <button class="small-btn secondary-btn" onclick="clearHistory()">Clear All</button>
+                <span>📜 История</span>
+                <button class="small-btn secondary-btn" onclick="clearHistory()">Очистить всё</button>
             </div>
             <div id="history-list"></div>
         </div>
@@ -328,17 +320,17 @@
             const shift = parseInt(document.getElementById('shift').value);
             
             if (!message) {
-                alert('Please enter a message');
+                alert('Введи сообщение');
                 return;
             }
             
             if (shift < 1 || shift > 25) {
-                alert('Shift must be between 1 and 25');
+                alert('Сдвиг должен быть от 1 до 25');
                 return;
             }
             
             const encoded = caesarCipher(message, shift, true);
-            showResult(`Encoded message (shift ${shift}):`, encoded);
+            showResult(`Зашифрованное сообщение (сдвиг ${shift}):`, encoded);
             addToHistory(message, encoded, shift, 'encode');
         }
         
@@ -347,17 +339,17 @@
             const shift = parseInt(document.getElementById('decode-shift').value);
             
             if (!message) {
-                alert('Please enter an encoded message');
+                alert('Введи зашифрованное сообщение');
                 return;
             }
             
             if (shift < 1 || shift > 25) {
-                alert('Shift must be between 1 and 25');
+                alert('Сдвиг должен быть от 1 до 25');
                 return;
             }
             
             const decoded = caesarCipher(message, shift, false);
-            showResult(`Decoded message (shift ${shift}):`, decoded);
+            showResult(`Расшифрованное сообщение (сдвиг ${shift}):`, decoded);
             addToHistory(message, decoded, shift, 'decode');
         }
         
@@ -369,9 +361,10 @@
         
         function copyResult() {
             const text = document.getElementById('result-text').textContent;
-            navigator.clipboard.writeText(text.split('\n')[1] || text)
-                .then(() => alert('Copied to clipboard!'))
-                .catch(err => console.error('Copy failed:', err));
+            const resultText = text.split('\n')[1] || text;
+            navigator.clipboard.writeText(resultText)
+                .then(() => alert('Скопировано в буфер!'))
+                .catch(err => console.error('Ошибка копирования:', err));
         }
         
         function clearFields() {
@@ -415,8 +408,8 @@
                         ${item.original.substring(0, 30)}${item.original.length > 30 ? '...' : ''}
                     </div>
                     <div class="history-actions">
-                        <button class="small-btn secondary-btn" onclick="useHistoryItem(${index})">Use</button>
-                        <button class="small-btn secondary-btn" onclick="deleteHistoryItem(${index})">Delete</button>
+                        <button class="small-btn secondary-btn" onclick="useHistoryItem(${index})">Использовать</button>
+                        <button class="small-btn secondary-btn" onclick="deleteHistoryItem(${index})">Удалить</button>
                     </div>
                 `;
                 container.appendChild(div);
@@ -446,7 +439,7 @@
         }
         
         function clearHistory() {
-            if (confirm('Clear all history?')) {
+            if (confirm('Очистить всю историю?')) {
                 localStorage.removeItem('secretChatHistory');
                 renderHistory();
             }
