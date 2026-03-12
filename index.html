@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecretChat 🔐</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 24px;
+            padding: 30px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+        
+        .tabs {
+            display: flex;
+            background: #f0f0f0;
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 25px;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            background: transparent;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 16px;
+        }
+        
+        .tab.active {
+            background: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        textarea, input {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: border 0.3s;
+            resize: vertical;
+        }
+        
+        textarea:focus, input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 25px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .primary-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .secondary-btn {
+            background: #f0f0f0;
+            color: #333;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .result {
+            margin-top: 25px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            text-align: left;
+            display: none;
+        }
+        
+        .result-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .result-text {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            word-break: break-all;
+            font-family: monospace;
+            margin-bottom: 15px;
+        }
+        
+        .copy-btn {
+            width: 100%;
+            background: #10b981;
+            color: white;
+        }
+        
+        .history {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .history-title {
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .history-item {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .history-text {
+            font-family: monospace;
+            font-size: 14px;
+            max-width: 70%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .history-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .small-btn {
+            padding: 6px 12px;
+            font-size: 12px;
+            border-radius: 6px;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .buttons {
+                flex-direction: column;
+            }
+            
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 SecretChat</h1>
+        <p class="subtitle">Encode and decode secret messages with friends</p>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('encode')">Encode</button>
+            <button class="tab" onclick="switchTab('decode')">Decode</button>
+        </div>
+        
+        <div id="encode-section">
+            <div class="input-group">
+                <label for="message">Your message:</label>
+                <textarea id="message" rows="4" placeholder="Type your secret message here..."></textarea>
+            </div>
+            
+            <div class="input-group">
+                <label for="shift">Shift (1-25):</label>
+                <input type="number" id="shift" min="1" max="25" value="3" placeholder="3">
+            </div>
+            
+            <div class="buttons">
+                <button class="primary-btn" onclick="encodeMessage()">
+                    <span>🔒 Encode</span>
+                </button>
+                <button class="secondary-btn" onclick="clearFields()">
+                    <span>🗑️ Clear</span>
+                </button>
+            </div>
+        </div>
+        
+        <div id="decode-section" style="display: none;">
+            <div class="input-group">
+                <label for="encoded-message">Encoded message:</label>
+                <textarea id="encoded-message" rows="4" placeholder="Paste encoded message here..."></textarea>
+            </div>
+            
+            <div class="input-group">
+                <label for="decode-shift">Shift (1-25):</label>
+                <input type="number" id="decode-shift" min="1" max="25" value="3" placeholder="3">
+            </div>
+            
+            <div class="buttons">
+                <button class="primary-btn" onclick="decodeMessage()">
+                    <span>🔓 Decode</span>
+                </button>
+                <button class="secondary-btn" onclick="clearDecodeFields()">
+                    <span>🗑️ Clear</span>
+                </button>
+            </div>
+        </div>
+        
+        <div class="result" id="result">
+            <div class="result-title">Result:</div>
+            <div class="result-text" id="result-text"></div>
+            <button class="copy-btn" onclick="copyResult()">📋 Copy to clipboard</button>
+        </div>
+        
+        <div class="history">
+            <div class="history-title">
+                <span>📜 History</span>
+                <button class="small-btn secondary-btn" onclick="clearHistory()">Clear All</button>
+            </div>
+            <div id="history-list"></div>
+        </div>
+    </div>
+    
+    <script>
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => {
+                if (t.textContent.toLowerCase().includes(tab)) {
+                    t.classList.add('active');
+                }
+            });
+            
+            document.getElementById('encode-section').style.display = tab === 'encode' ? 'block' : 'none';
+            document.getElementById('decode-section').style.display = tab === 'decode' ? 'block' : 'none';
+            document.getElementById('result').style.display = 'none';
+        }
+        
+        function caesarCipher(text, shift, encode = true) {
+            let result = '';
+            shift = encode ? shift : -shift;
+            
+            for (let i = 0; i < text.length; i++) {
+                let char = text[i];
+                if (char.match(/[a-z]/i)) {
+                    let code = text.charCodeAt(i);
+                    let base = code >= 65 && code <= 90 ? 65 : 97;
+                    char = String.fromCharCode(((code - base + shift + 26) % 26) + base);
+                }
+                result += char;
+            }
+            return result;
+        }
+        
+        function encodeMessage() {
+            const message = document.getElementById('message').value.trim();
+            const shift = parseInt(document.getElementById('shift').value);
+            
+            if (!message) {
+                alert('Please enter a message');
+                return;
+            }
+            
+            if (shift < 1 || shift > 25) {
+                alert('Shift must be between 1 and 25');
+                return;
+            }
+            
+            const encoded = caesarCipher(message, shift, true);
+            showResult(`Encoded message (shift ${shift}):`, encoded);
+            addToHistory(message, encoded, shift, 'encode');
+        }
+        
+        function decodeMessage() {
+            const message = document.getElementById('encoded-message').value.trim();
+            const shift = parseInt(document.getElementById('decode-shift').value);
+            
+            if (!message) {
+                alert('Please enter an encoded message');
+                return;
+            }
+            
+            if (shift < 1 || shift > 25) {
+                alert('Shift must be between 1 and 25');
+                return;
+            }
+            
+            const decoded = caesarCipher(message, shift, false);
+            showResult(`Decoded message (shift ${shift}):`, decoded);
+            addToHistory(message, decoded, shift, 'decode');
+        }
+        
+        function showResult(title, text) {
+            document.getElementById('result-text').textContent = `${title}\n${text}`;
+            document.getElementById('result').style.display = 'block';
+            document.getElementById('result-text').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function copyResult() {
+            const text = document.getElementById('result-text').textContent;
+            navigator.clipboard.writeText(text.split('\n')[1] || text)
+                .then(() => alert('Copied to clipboard!'))
+                .catch(err => console.error('Copy failed:', err));
+        }
+        
+        function clearFields() {
+            document.getElementById('message').value = '';
+            document.getElementById('shift').value = '3';
+            document.getElementById('result').style.display = 'none';
+        }
+        
+        function clearDecodeFields() {
+            document.getElementById('encoded-message').value = '';
+            document.getElementById('decode-shift').value = '3';
+            document.getElementById('result').style.display = 'none';
+        }
+        
+        function addToHistory(original, result, shift, type) {
+            const history = JSON.parse(localStorage.getItem('secretChatHistory') || '[]');
+            history.unshift({
+                original,
+                result,
+                shift,
+                type,
+                timestamp: new Date().toLocaleString()
+            });
+            
+            if (history.length > 10) history.pop();
+            localStorage.setItem('secretChatHistory', JSON.stringify(history));
+            renderHistory();
+        }
+        
+        function renderHistory() {
+            const history = JSON.parse(localStorage.getItem('secretChatHistory') || '[]');
+            const container = document.getElementById('history-list');
+            container.innerHTML = '';
+            
+            history.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = 'history-item';
+                div.innerHTML = `
+                    <div class="history-text">
+                        <strong>${item.type === 'encode' ? '🔒' : '🔓'}</strong> 
+                        ${item.original.substring(0, 30)}${item.original.length > 30 ? '...' : ''}
+                    </div>
+                    <div class="history-actions">
+                        <button class="small-btn secondary-btn" onclick="useHistoryItem(${index})">Use</button>
+                        <button class="small-btn secondary-btn" onclick="deleteHistoryItem(${index})">Delete</button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+        
+        function useHistoryItem(index) {
+            const history = JSON.parse(localStorage.getItem('secretChatHistory') || '[]');
+            const item = history[index];
+            
+            if (item.type === 'encode') {
+                switchTab('encode');
+                document.getElementById('message').value = item.original;
+                document.getElementById('shift').value = item.shift;
+            } else {
+                switchTab('decode');
+                document.getElementById('encoded-message').value = item.original;
+                document.getElementById('decode-shift').value = item.shift;
+            }
+        }
+        
+        function deleteHistoryItem(index) {
+            const history = JSON.parse(localStorage.getItem('secretChatHistory') || '[]');
+            history.splice(index, 1);
+            localStorage.setItem('secretChatHistory', JSON.stringify(history));
+            renderHistory();
+        }
+        
+        function clearHistory() {
+            if (confirm('Clear all history?')) {
+                localStorage.removeItem('secretChatHistory');
+                renderHistory();
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            renderHistory();
+            document.getElementById('message').focus();
+        });
+    </script>
+</body>
+</html>
